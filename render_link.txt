@@ -3,10 +3,10 @@
 ====================================================
 
 Live App URL:
-https://fastapi-inventory-system.onrender.com
+https://render-s9bf.onrender.com
 
 API Docs (Swagger UI):
-https://fastapi-inventory-system.onrender.com/docs
+https://render-s9bf.onrender.com/docs
 
 Endpoints:
   GET    /           → Dashboard UI
@@ -16,9 +16,6 @@ Endpoints:
   DELETE /items/{id}  → Delete item
   GET    /summary     → Stats & low stock alerts
   GET    /docs        → Swagger UI
-
-NOTE: Replace "fastapi-inventory-system" with your
-actual Render service name after deployment.
 
 ====================================================
 Project  : Cloud Computing — FastAPI Inventory System
