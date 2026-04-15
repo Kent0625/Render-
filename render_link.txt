@@ -1,0 +1,26 @@
+====================================================
+  Inventory System — Render Deployment Link
+====================================================
+
+Live App URL:
+https://fastapi-inventory-system.onrender.com
+
+API Docs (Swagger UI):
+https://fastapi-inventory-system.onrender.com/docs
+
+Endpoints:
+  GET    /           → Dashboard UI
+  GET    /items       → List all items
+  POST   /items       → Add item
+  PUT    /items/{id}  → Update item
+  DELETE /items/{id}  → Delete item
+  GET    /summary     → Stats & low stock alerts
+  GET    /docs        → Swagger UI
+
+NOTE: Replace "fastapi-inventory-system" with your
+actual Render service name after deployment.
+
+====================================================
+Project  : Cloud Computing — FastAPI Inventory System
+Platform : Render (render.com)
+====================================================

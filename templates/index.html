@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161922;
+      --surface2: #1e222e;
+      --border: #2a2f3d;
+      --accent: #6ee7b7;
+      --accent2: #818cf8;
+      --danger: #f87171;
+      --warn: #fbbf24;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--muted); font-weight: 400; }
+    .header-badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--accent); }
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-value.purple { color: var(--accent2); }
+    .stat-value.red { color: var(--danger); }
+    .stat-value.yellow { color: var(--warn); }
+
+    /* ── Main Grid ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Search & Filter ── */
+    .toolbar {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+    .toolbar input, .toolbar select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      padding: 7px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .toolbar input { flex: 1; }
+    .toolbar input:focus, .toolbar select:focus { border-color: var(--accent); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    thead tr { background: var(--surface2); }
+    th {
+      padding: 10px 16px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-top: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: var(--surface2); }
+    td { padding: 12px 16px; vertical-align: middle; }
+
+    .category-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent2);
+      border: 1px solid rgba(99,102,241,0.3);
+    }
+    .qty-badge {
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .qty-ok { background: rgba(110,231,183,0.12); color: var(--accent); }
+    .qty-low { background: rgba(251,191,36,0.12); color: var(--warn); }
+    .qty-out { background: rgba(248,113,113,0.12); color: var(--danger); }
+
+    .action-btns { display: flex; gap: 6px; }
+    .btn-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 5px 8px;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-icon.del:hover { border-color: var(--danger); color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    /* ── Add Form ── */
+    .form-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      padding: 8px 11px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 7px;
+      padding: 10px 16px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      width: 100%;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.error { border-color: var(--danger); color: var(--danger); }
+
+    /* ── Low Stock Panel ── */
+    .alert-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .alert-item {
+      background: rgba(251,191,36,0.07);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 7px;
+      padding: 10px 13px;
+      font-size: 0.78rem;
+    }
+    .alert-item .name { color: var(--text); font-weight: 500; margin-bottom: 2px; }
+    .alert-item .meta { color: var(--warn); font-size: 0.7rem; }
+
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      header { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">inv<span>//</span>system</div>
+  <div class="header-badge">Cloud Computing Project</div>
+</header>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-label">Total Items</div><div class="stat-value" id="s-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Stock Value</div><div class="stat-value purple" id="s-value">—</div></div>
+    <div class="stat-card"><div class="stat-label">Categories</div><div class="stat-value" id="s-cats">—</div></div>
+    <div class="stat-card"><div class="stat-label">Low Stock</div><div class="stat-value red" id="s-low">—</div></div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- Left: Table -->
+    <div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Inventory Items</span>
+          <span style="font-size:0.72rem; color:var(--muted)" id="item-count"></span>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="search-input" placeholder="Search items..." oninput="filterItems()"/>
+          <select id="cat-filter" onchange="filterItems()">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Name</th><th>Category</th>
+                <th>Qty</th><th>Price</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="items-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Add Form + Low Stock -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Add New Item</span></div>
+        <div class="form-body">
+          <div class="form-group">
+            <label>Item Name</label>
+            <input type="text" id="f-name" placeholder="e.g. USB Hub"/>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="f-category" placeholder="e.g. Electronics"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Quantity</label>
+              <input type="number" id="f-qty" placeholder="0" min="0"/>
+            </div>
+            <div class="form-group">
+              <label>Price (₱)</label>
+              <input type="number" id="f-price" placeholder="0.00" step="0.01" min="0"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="f-desc" placeholder="Optional..."></textarea>
+          </div>
+          <button class="btn-primary" onclick="addItem()">+ Add Item</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">⚠ Low Stock Alerts</span></div>
+        <div class="alert-list" id="alert-list">
+          <div class="empty-state">No alerts</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = '';
+  let allItems = [];
+
+  async function fetchItems() {
+    const res = await fetch(`${API}/items`);
+    const data = await res.json();
+    allItems = data.items;
+    renderTable(allItems);
+    updateCategoryFilter(allItems);
+    document.getElementById('item-count').textContent = `${allItems.length} item(s)`;
+  }
+
+  async function fetchSummary() {
+    const res = await fetch(`${API}/summary`);
+    const d = await res.json();
+    document.getElementById('s-total').textContent = d.total_items;
+    document.getElementById('s-value').textContent = '₱' + d.total_stock_value.toLocaleString('en-PH', {minimumFractionDigits: 2});
+    document.getElementById('s-cats').textContent = Object.keys(d.categories).length;
+    document.getElementById('s-low').textContent = d.low_stock_alerts.length;
+
+    const list = document.getElementById('alert-list');
+    if (d.low_stock_alerts.length === 0) {
+      list.innerHTML = '<div class="empty-state">No low stock items 🎉</div>';
+    } else {
+      list.innerHTML = d.low_stock_alerts.map(i => `
+        <div class="alert-item">
+          <div class="name">${i.name}</div>
+          <div class="meta">Only ${i.quantity} left · ${i.category}</div>
+        </div>`).join('');
+    }
+  }
+
+  function qtyBadge(q) {
+    if (q === 0) return `<span class="qty-badge qty-out">${q}</span>`;
+    if (q <= 5) return `<span class="qty-badge qty-low">${q}</span>`;
+    return `<span class="qty-badge qty-ok">${q}</span>`;
+  }
+
+  function renderTable(items) {
+    const tbody = document.getElementById('items-tbody');
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No items found</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(i => `
+      <tr>
+        <td style="color:var(--muted); font-size:0.72rem">#${i.id}</td>
+        <td style="font-weight:500">${i.name}</td>
+        <td><span class="category-pill">${i.category}</span></td>
+        <td>${qtyBadge(i.quantity)}</td>
+        <td style="color:var(--accent2)">₱${parseFloat(i.price).toFixed(2)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-icon" onclick="promptRestock(${i.id}, '${i.name}', ${i.quantity})">+qty</button>
+            <button class="btn-icon del" onclick="deleteItem(${i.id}, '${i.name}')">del</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function updateCategoryFilter(items) {
+    const cats = [...new Set(items.map(i => i.category))];
+    const sel = document.getElementById('cat-filter');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All Categories</option>' +
+      cats.map(c => `<option value="${c}" ${c === current ? 'selected' : ''}>${c}</option>`).join('');
+  }
+
+  function filterItems() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const cat = document.getElementById('cat-filter').value;
+    let filtered = allItems;
+    if (q) filtered = filtered.filter(i => i.name.toLowerCase().includes(q));
+    if (cat) filtered = filtered.filter(i => i.category === cat);
+    renderTable(filtered);
+    document.getElementById('item-count').textContent = `${filtered.length} item(s)`;
+  }
+
+  async function addItem() {
+    const name = document.getElementById('f-name').value.trim();
+    const category = document.getElementById('f-category').value.trim();
+    const quantity = parseInt(document.getElementById('f-qty').value);
+    const price = parseFloat(document.getElementById('f-price').value);
+    const description = document.getElementById('f-desc').value.trim();
+
+    if (!name || !category || isNaN(quantity) || isNaN(price)) {
+      toast('Please fill in all required fields.', true);
+      return;
+    }
+
+    const res = await fetch(`${API}/items`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category, quantity, price, description })
+    });
+
+    if (res.ok) {
+      ['f-name','f-category','f-qty','f-price','f-desc'].forEach(id => document.getElementById(id).value = '');
+      toast(`"${name}" added to inventory!`);
+      fetchItems(); fetchSummary();
+    } else {
+      toast('Error adding item.', true);
+    }
+  }
+
+  async function promptRestock(id, name, current) {
+    const val = prompt(`Update quantity for "${name}" (current: ${current}):`);
+    if (val === null || val === '') return;
+    const qty = parseInt(val);
+    if (isNaN(qty) || qty < 0) { toast('Invalid quantity.', true); return; }
+
+    const res = await fetch(`${API}/items/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity: qty })
+    });
+    if (res.ok) { toast(`Quantity updated to ${qty}!`); fetchItems(); fetchSummary(); }
+  }
+
+  async function deleteItem(id, name) {
+    if (!confirm(`Delete "${name}" from inventory?`)) return;
+    const res = await fetch(`${API}/items/${id}`, { method: 'DELETE' });
+    if (res.ok) { toast(`"${name}" removed.`); fetchItems(); fetchSummary(); }
+  }
+
+  function toast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = isError ? 'show error' : 'show';
+    setTimeout(() => t.className = '', 2800);
+  }
+
+  fetchItems();
+  fetchSummary();
+</script>
+</body>
+</html>
